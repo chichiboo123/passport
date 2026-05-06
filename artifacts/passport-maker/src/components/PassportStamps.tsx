@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { t } from '@/lib/i18n';
 import { formatDate } from '@/lib/utils';
 import type { AppState, Lang, Stamp } from '@/lib/types';
@@ -6,10 +7,11 @@ interface Props {
   state: AppState;
   lang: Lang;
   onDeleteStamp: (id: string) => void;
+  onDragStamp: (id: string, x: number, y: number) => void;
   newStampId?: string;
 }
 
-export default function PassportStamps({ state, lang, onDeleteStamp, newStampId }: Props) {
+export default function PassportStamps({ state, lang, onDeleteStamp, onDragStamp, newStampId }: Props) {
   const { stamps, theme } = state;
 
   return (
@@ -20,6 +22,7 @@ export default function PassportStamps({ state, lang, onDeleteStamp, newStampId 
         lang={lang}
         theme={theme}
         onDeleteStamp={onDeleteStamp}
+        onDragStamp={onDragStamp}
         pageLabel="VISAS"
         isEmpty={stamps.length === 0}
         newStampId={newStampId}
@@ -34,6 +37,7 @@ export default function PassportStamps({ state, lang, onDeleteStamp, newStampId 
         lang={lang}
         theme={theme}
         onDeleteStamp={onDeleteStamp}
+        onDragStamp={onDragStamp}
         pageLabel="VISAS"
         isEmpty={false}
         hideEmpty
@@ -48,13 +52,16 @@ interface StampPageProps {
   lang: Lang;
   theme: string;
   onDeleteStamp: (id: string) => void;
+  onDragStamp: (id: string, x: number, y: number) => void;
   pageLabel: string;
   isEmpty: boolean;
   hideEmpty?: boolean;
   newStampId?: string;
 }
 
-function StampPage({ stamps, lang, theme, onDeleteStamp, isEmpty, hideEmpty, newStampId }: StampPageProps) {
+function StampPage({ stamps, lang, theme, onDeleteStamp, onDragStamp, isEmpty, hideEmpty, newStampId }: StampPageProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   return (
     <div style={{
       width: 330,
@@ -135,19 +142,21 @@ function StampPage({ stamps, lang, theme, onDeleteStamp, isEmpty, hideEmpty, new
         </span>
       </div>
 
-      {/* Stamps */}
-      <div style={{ position: 'absolute', inset: 26, zIndex: 1 }}>
+      {/* Stamps container */}
+      <div ref={containerRef} style={{ position: 'absolute', inset: 26, zIndex: 1 }}>
         {stamps.map(stamp => (
           <StampItem
             key={stamp.id}
             stamp={stamp}
             onDelete={() => onDeleteStamp(stamp.id)}
+            onDragUpdate={onDragStamp}
+            containerRef={containerRef}
             isNew={stamp.id === newStampId}
           />
         ))}
       </div>
 
-      {/* Empty state — friendlier for kids */}
+      {/* Empty state */}
       {isEmpty && !hideEmpty && (
         <div style={{
           position: 'absolute',
@@ -185,13 +194,46 @@ function StampPage({ stamps, lang, theme, onDeleteStamp, isEmpty, hideEmpty, new
   );
 }
 
-function StampItem({ stamp, onDelete, isNew }: { stamp: Stamp; onDelete: () => void; isNew?: boolean }) {
-  const { emoji, place, date, x, y, rotation, color } = stamp;
+interface StampItemProps {
+  stamp: Stamp;
+  onDelete: () => void;
+  onDragUpdate: (id: string, x: number, y: number) => void;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  isNew?: boolean;
+}
+
+function StampItem({ stamp, onDelete, onDragUpdate, containerRef, isNew }: StampItemProps) {
+  const { emoji, image, place, date, x, y, rotation, color } = stamp;
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef<{ px: number; py: number; sx: number; sy: number } | null>(null);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if ((e.target as Element).closest('.stamp-delete-btn')) return;
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setIsDragging(true);
+    dragStartRef.current = { px: e.clientX, py: e.clientY, sx: x, sy: y };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging || !dragStartRef.current || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const dx = e.clientX - dragStartRef.current.px;
+    const dy = e.clientY - dragStartRef.current.py;
+    const newX = Math.max(5, Math.min(95, dragStartRef.current.sx + (dx / rect.width) * 100));
+    const newY = Math.max(5, Math.min(95, dragStartRef.current.sy + (dy / rect.height) * 100));
+    onDragUpdate(stamp.id, newX, newY);
+  };
+
+  const handlePointerUp = () => {
+    setIsDragging(false);
+    dragStartRef.current = null;
+  };
 
   return (
     <div
       data-testid={`stamp-item-${stamp.id}`}
-      className={`stamp-item${isNew ? ' new-stamp' : ''}`}
+      className={`stamp-item${isNew ? ' new-stamp' : ''}${isDragging ? ' dragging' : ''}`}
       style={{
         position: 'absolute',
         left: `${x}%`,
@@ -199,16 +241,34 @@ function StampItem({ stamp, onDelete, isNew }: { stamp: Stamp; onDelete: () => v
         transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
         '--r': `${rotation}deg`,
         color: color,
-        zIndex: 2,
+        zIndex: isDragging ? 10 : 2,
+        touchAction: 'none',
       } as React.CSSProperties}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
     >
       <div className="stamp-circle" style={{ borderColor: color, boxShadow: `inset 0 0 0 2px ${color}` }}>
-        <div className="stamp-emoji">{emoji}</div>
+        {image ? (
+          <img
+            src={image}
+            alt={place}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              objectFit: 'cover',
+              display: 'block',
+            }}
+          />
+        ) : (
+          <div className="stamp-emoji">{emoji}</div>
+        )}
         <div className="stamp-place" style={{ color, fontSize: 7, fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', maxWidth: 56, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'center' }}>
           {place}
         </div>
 
-        {/* Delete button — always visible at reduced opacity for touch accessibility */}
         <button
           data-testid={`btn-delete-stamp-${stamp.id}`}
           className="stamp-delete-btn"

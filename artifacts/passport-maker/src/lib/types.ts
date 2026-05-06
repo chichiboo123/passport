@@ -5,6 +5,7 @@ export type View = 'profile' | 'stamp';
 export interface Stamp {
   id: string;
   emoji: string;
+  image?: string;
   place: string;
   date: string;
   x: number;

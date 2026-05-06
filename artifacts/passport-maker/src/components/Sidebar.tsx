@@ -1,14 +1,15 @@
+import { useRef } from 'react';
 import { t } from '@/lib/i18n';
 import type { AppState, Theme, Lang } from '@/lib/types';
 
 interface SidebarProps {
   state: AppState;
-  stampForm: { emoji: string; place: string; date: string };
+  stampForm: { emoji: string; place: string; date: string; image: string };
   stampError: string;
   onThemeChange: (theme: Theme) => void;
   onCharacterChange: (partial: Partial<AppState['character']>) => void;
   onPhotoClick: () => void;
-  onStampFormChange: (partial: Partial<{ emoji: string; place: string; date: string }>) => void;
+  onStampFormChange: (partial: Partial<{ emoji: string; place: string; date: string; image: string }>) => void;
   onAddStamp: () => void;
 }
 
@@ -38,6 +39,18 @@ export default function Sidebar({
 }: SidebarProps) {
   const lang: Lang = state.lang;
   const stampCount = state.stamps.length;
+  const stampImageInputRef = useRef<HTMLInputElement>(null);
+
+  const handleStampImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      onStampFormChange({ image: ev.target?.result as string, emoji: '' });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
 
   return (
     <aside className="sidebar" role="complementary" aria-label="Editor panel">
@@ -170,7 +183,7 @@ export default function Sidebar({
             type="text"
             placeholder={t(lang, 'emojiPlaceholder')}
             value={stampForm.emoji}
-            onChange={e => onStampFormChange({ emoji: e.target.value })}
+            onChange={e => onStampFormChange({ emoji: e.target.value, image: '' })}
             style={{ fontSize: 20, textAlign: 'center', letterSpacing: '0.1em' }}
           />
           <div className="emoji-picker-grid" role="group" aria-label={t(lang, 'quickEmojiSelect')}>
@@ -178,8 +191,8 @@ export default function Sidebar({
               <button
                 key={emoji}
                 type="button"
-                className={`emoji-pick-btn${stampForm.emoji === emoji ? ' selected' : ''}`}
-                onClick={() => onStampFormChange({ emoji })}
+                className={`emoji-pick-btn${stampForm.emoji === emoji && !stampForm.image ? ' selected' : ''}`}
+                onClick={() => onStampFormChange({ emoji, image: '' })}
                 aria-label={emoji}
                 title={emoji}
               >
@@ -187,6 +200,47 @@ export default function Sidebar({
               </button>
             ))}
           </div>
+
+          {/* Image upload for stamp */}
+          <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 12, color: 'hsl(var(--muted-foreground))', flexShrink: 0 }}>
+              {t(lang, 'stampImageLabel')}
+            </span>
+            {stampForm.image ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <img
+                  src={stampForm.image}
+                  alt="stamp preview"
+                  style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--theme-primary, #1a56db)' }}
+                />
+                <button
+                  type="button"
+                  className="btn btn-sm btn-secondary"
+                  style={{ padding: '4px 10px', fontSize: 12, minHeight: 28 }}
+                  onClick={() => onStampFormChange({ image: '' })}
+                >
+                  {t(lang, 'stampImageClear')}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-sm btn-secondary"
+                style={{ padding: '4px 10px', fontSize: 12, minHeight: 28 }}
+                onClick={() => stampImageInputRef.current?.click()}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 15 }}>image</span>
+                {t(lang, 'stampImageBtn')}
+              </button>
+            )}
+          </div>
+          <input
+            ref={stampImageInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleStampImageUpload}
+          />
         </div>
 
         {/* Place + Date in one row */}
