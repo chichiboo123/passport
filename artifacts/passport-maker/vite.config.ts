@@ -13,7 +13,24 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-const basePath = process.env.BASE_PATH ?? "/";
+const normalizeBasePath = (value?: string) => {
+  if (!value || value.trim() === "") {
+    // Relative asset paths are more robust when the app is served from
+    // custom domains or nested paths.
+    return "./";
+  }
+
+  const trimmed = value.trim();
+
+  if (trimmed === "/") {
+    return "/";
+  }
+
+  const prefixed = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  return prefixed.endsWith("/") ? prefixed : `${prefixed}/`;
+};
+
+const basePath = normalizeBasePath(process.env.BASE_PATH);
 
 export default defineConfig({
   base: basePath,
