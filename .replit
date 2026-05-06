@@ -3,6 +3,8 @@ modules = ["nodejs-24"]
 [deployment]
 router = "application"
 deploymentTarget = "autoscale"
+build = ["sh", "-c", "BASE_PATH=/ pnpm --filter @workspace/passport-maker run build && pnpm --filter @workspace/api-server run build"]
+run = ["sh", "-c", "PORT=8080 node --enable-source-maps artifacts/api-server/dist/index.mjs"]
 
 [deployment.postBuild]
 args = ["pnpm", "store", "prune"]

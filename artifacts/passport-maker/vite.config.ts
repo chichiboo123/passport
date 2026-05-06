@@ -4,7 +4,9 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-const rawPort = process.env.PORT ?? "5173";
+// During `vite build` (production), PORT/BASE_PATH may not be injected yet —
+// fall back to safe defaults so the build doesn't throw.
+const rawPort = process.env.PORT ?? "8080";
 const port = Number(rawPort);
 
 if (Number.isNaN(port) || port <= 0) {
