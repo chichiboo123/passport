@@ -55,6 +55,7 @@ function PassportMaker() {
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [mobileTab, setMobileTab] = useState<'edit' | 'preview'>('edit');
+  const [sidebarWidth, setSidebarWidth] = useState(320);
 
   const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
@@ -174,19 +175,25 @@ function PassportMaker() {
       const { default: html2canvas } = await import('html2canvas');
       const el = canvasRef.current;
       if (!el) return;
-      // Remove any CSS zoom so html2canvas captures at 1:1 scale
+      // Temporarily disable animation and reset zoom so html2canvas captures cleanly
+      const prevAnimation = el.style.animation;
       const prevZoom = el.style.zoom;
+      el.style.animation = 'none';
       el.style.zoom = '1';
+      // Wait one frame to ensure layout is stable after style changes
+      await new Promise(resolve => requestAnimationFrame(resolve));
       const canvas = await html2canvas(el, {
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#e8ecf1',
+        backgroundColor: null,
         scale: 2,
         width: el.scrollWidth,
         height: el.scrollHeight,
         windowWidth: el.scrollWidth,
         windowHeight: el.scrollHeight,
+        logging: false,
       });
+      el.style.animation = prevAnimation;
       el.style.zoom = prevZoom;
       const url = canvas.toDataURL('image/png');
       const a = document.createElement('a');
@@ -201,6 +208,26 @@ function PassportMaker() {
       setSaving(false);
     }
   };
+
+  const handleResizerMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = sidebarWidth;
+    const onMouseMove = (ev: MouseEvent) => {
+      const newWidth = Math.min(600, Math.max(240, startWidth + ev.clientX - startX));
+      setSidebarWidth(newWidth);
+    };
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }, [sidebarWidth]);
 
   const mrz = generateMRZ(state.character.name, state.character.nationality, state.character.birthdate, state.passportNo);
 
@@ -328,7 +355,9 @@ function PassportMaker() {
           onPhotoClick={() => fileInputRef.current?.click()}
           onStampFormChange={(partial) => setStampForm(prev => ({ ...prev, ...partial }))}
           onAddStamp={addStamp}
+          style={{ width: sidebarWidth }}
         />
+        <div className="sidebar-resizer" onMouseDown={handleResizerMouseDown} />
 
         {/* Hidden file input for photo */}
         <input

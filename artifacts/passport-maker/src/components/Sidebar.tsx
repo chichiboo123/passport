@@ -11,6 +11,7 @@ interface SidebarProps {
   onPhotoClick: () => void;
   onStampFormChange: (partial: Partial<{ emoji: string; place: string; date: string; image: string }>) => void;
   onAddStamp: () => void;
+  style?: React.CSSProperties;
 }
 
 const THEMES: { id: Theme; color: string; label: string }[] = [
@@ -36,6 +37,7 @@ export default function Sidebar({
   onPhotoClick,
   onStampFormChange,
   onAddStamp,
+  style,
 }: SidebarProps) {
   const lang: Lang = state.lang;
   const stampCount = state.stamps.length;
@@ -54,7 +56,7 @@ export default function Sidebar({
   };
 
   return (
-    <aside className="sidebar" role="complementary" aria-label="Editor panel">
+    <aside className="sidebar" style={style} role="complementary" aria-label="Editor panel">
 
       {/* Section 1: Theme */}
       <div className="sidebar-section">
@@ -162,22 +164,8 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* Message: 캐릭터를 만날 사람들에게 */}
-        <div className="form-group" style={{ marginTop: 8, marginBottom: 6 }}>
-          <label className="form-label" htmlFor="char-msg">{t(lang, 'favorites')}</label>
-          <textarea
-            id="char-msg"
-            data-testid="input-favorites"
-            className="form-input form-textarea"
-            placeholder={t(lang, 'favoritesPlaceholder')}
-            value={state.character.message}
-            onChange={e => onCharacterChange({ message: e.target.value })}
-            rows={2}
-          />
-        </div>
-
         {/* Likes + Caution in one row */}
-        <div className="stamp-form-row" style={{ marginBottom: 0 }}>
+        <div className="stamp-form-row" style={{ marginTop: 8, marginBottom: 0 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <label className="form-label" htmlFor="char-likes">{t(lang, 'likesLabel')}</label>
             <textarea
@@ -202,6 +190,20 @@ export default function Sidebar({
               rows={2}
             />
           </div>
+        </div>
+
+        {/* Message: 캐릭터를 만날 사람들에게 */}
+        <div className="form-group" style={{ marginTop: 8, marginBottom: 0 }}>
+          <label className="form-label" htmlFor="char-msg">{t(lang, 'favorites')}</label>
+          <textarea
+            id="char-msg"
+            data-testid="input-favorites"
+            className="form-input form-textarea"
+            placeholder={t(lang, 'favoritesPlaceholder')}
+            value={state.character.message}
+            onChange={e => onCharacterChange({ message: e.target.value })}
+            rows={2}
+          />
         </div>
       </div>
 

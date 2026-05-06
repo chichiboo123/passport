@@ -322,6 +322,22 @@
   line-height: 1.4;
 }
 
+/* ===== Sidebar resize handle ===== */
+.sidebar-resizer {
+  width: 5px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: hsl(var(--border));
+  transition: background 0.15s;
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-resizer:hover,
+.sidebar-resizer:active {
+  background: var(--theme-primary, #1a56db);
+}
+
 /* ===== Canvas area ===== */
 .canvas-area {
   flex: 1;
@@ -1171,7 +1187,11 @@
 
   /* Sidebar full-width on mobile */
   .sidebar {
-    width: 100%;
+    width: 100% !important;
+  }
+
+  .sidebar-resizer {
+    display: none;
   }
 
   .sidebar-section {
