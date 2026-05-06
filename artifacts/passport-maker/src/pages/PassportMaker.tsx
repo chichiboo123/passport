@@ -13,11 +13,19 @@ interface Toast {
   hiding: boolean;
 }
 
+const LANG_OPTIONS: { value: Lang; label: string }[] = [
+  { value: 'ko', label: '한국어' },
+  { value: 'en', label: 'English' },
+  { value: 'ja', label: '日本語' },
+  { value: 'id', label: 'Bahasa Indonesia' },
+];
+
 function PassportMaker() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const jsonMenuRef = useRef<HTMLDivElement>(null);
+  const langMenuRef = useRef<HTMLDivElement>(null);
 
   const [state, setState] = useState<AppState>({
     theme: 'blue',
@@ -35,12 +43,14 @@ function PassportMaker() {
     issueDate: todayStr(),
   });
 
-  const [stampForm, setStampForm] = useState({ emoji: '', place: '', date: todayStr() });
+  const [stampForm, setStampForm] = useState({ emoji: '', place: '', date: todayStr(), image: '' });
   const [stampError, setStampError] = useState('');
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
   const [newStampId, setNewStampId] = useState<string | undefined>(undefined);
   const [jsonMenuOpen, setJsonMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [mobileTab, setMobileTab] = useState<'edit' | 'preview'>('edit');
 
   const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
@@ -60,6 +70,9 @@ function PassportMaker() {
       if (jsonMenuRef.current && !jsonMenuRef.current.contains(e.target as Node)) {
         setJsonMenuOpen(false);
       }
+      if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
+        setLangMenuOpen(false);
+      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -71,6 +84,13 @@ function PassportMaker() {
 
   const updateCharacter = useCallback((partial: Partial<AppState['character']>) => {
     setState(prev => ({ ...prev, character: { ...prev.character, ...partial } }));
+  }, []);
+
+  const dragStamp = useCallback((id: string, x: number, y: number) => {
+    setState(prev => ({
+      ...prev,
+      stamps: prev.stamps.map(s => s.id === id ? { ...s, x, y } : s),
+    }));
   }, []);
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,21 +106,22 @@ function PassportMaker() {
 
   const addStamp = () => {
     setStampError('');
-    if (!stampForm.emoji.trim()) { setStampError(t(state.lang, 'emojiRequired')); return; }
+    if (!stampForm.emoji.trim() && !stampForm.image) { setStampError(t(state.lang, 'emojiRequired')); return; }
     if (!stampForm.place.trim()) { setStampError(t(state.lang, 'placeRequired')); return; }
     const id = Date.now().toString();
     const newStamp: Stamp = {
       id,
       emoji: stampForm.emoji.trim(),
+      image: stampForm.image || undefined,
       place: stampForm.place.trim(),
       date: stampForm.date || todayStr(),
       ...randomStampProps(),
     };
     setState(prev => ({ ...prev, stamps: [...prev.stamps, newStamp], view: 'stamp' }));
-    setStampForm(prev => ({ ...prev, emoji: '', place: '' }));
+    setStampForm(prev => ({ ...prev, emoji: '', place: '', image: '' }));
     setNewStampId(id);
     setTimeout(() => setNewStampId(undefined), 600);
-    showToast(`${newStamp.emoji} ${t(state.lang, 'stampAdded')}`);
+    showToast(`${newStamp.image ? '🖼️' : newStamp.emoji} ${t(state.lang, 'stampAdded')}`);
   };
 
   const deleteStamp = (id: string) => {
@@ -217,17 +238,49 @@ function PassportMaker() {
             )}
           </div>
 
-          <select
-            data-testid="select-language"
-            className="lang-select"
-            value={state.lang}
-            onChange={e => update({ lang: e.target.value as Lang })}
+          {/* Language selector icon button */}
+          <div ref={langMenuRef} style={{ position: 'relative' }}>
+            <button
+              data-testid="btn-lang-menu"
+              className="header-icon-btn"
+              onClick={() => setLangMenuOpen(v => !v)}
+              title={t(state.lang, 'howToUse')}
+              aria-expanded={langMenuOpen}
+              aria-haspopup="menu"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 20 }}>language</span>
+            </button>
+            {langMenuOpen && (
+              <div className="json-dropdown" role="menu">
+                {LANG_OPTIONS.map(opt => (
+                  <button
+                    key={opt.value}
+                    className="json-dropdown-item"
+                    onClick={() => { update({ lang: opt.value }); setLangMenuOpen(false); }}
+                    role="menuitem"
+                  >
+                    {state.lang === opt.value && (
+                      <span className="material-symbols-outlined" style={{ fontSize: 15, color: 'var(--theme-primary, #1a56db)' }}>check</span>
+                    )}
+                    {state.lang !== opt.value && (
+                      <span style={{ display: 'inline-block', width: 15 }} />
+                    )}
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Help / About button */}
+          <button
+            data-testid="btn-help"
+            className="header-icon-btn"
+            onClick={() => setShowHelp(true)}
+            title={t(state.lang, 'howToUse')}
           >
-            <option value="ko">한국어</option>
-            <option value="en">English</option>
-            <option value="ja">日本語</option>
-            <option value="id">Bahasa Indonesia</option>
-          </select>
+            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>help_outline</span>
+          </button>
         </div>
       </header>
 
@@ -334,6 +387,7 @@ function PassportMaker() {
                   state={state}
                   lang={state.lang}
                   onDeleteStamp={deleteStamp}
+                  onDragStamp={dragStamp}
                   newStampId={newStampId}
                 />
               )}
@@ -361,6 +415,53 @@ function PassportMaker() {
             {toast.type === 'error' ? 'error' : 'check_circle'}
           </span>
           {toast.message}
+        </div>
+      )}
+
+      {/* Help / About modal */}
+      {showHelp && (
+        <div
+          className="help-overlay"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowHelp(false); }}
+        >
+          <div className="help-modal">
+            <div className="help-modal-header">
+              <span className="material-symbols-outlined" style={{ fontSize: 22, color: 'var(--theme-primary, #1a56db)' }}>help_outline</span>
+              <span style={{ fontWeight: 800, fontSize: 16 }}>{t(state.lang, 'howToUse')}</span>
+              <button
+                className="help-close-btn"
+                onClick={() => setShowHelp(false)}
+                aria-label={t(state.lang, 'howToUseClose')}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>close</span>
+              </button>
+            </div>
+            <div className="help-modal-body">
+              <ul className="help-steps">
+                <li>{t(state.lang, 'howToUseStep1')}</li>
+                <li>{t(state.lang, 'howToUseStep2')}</li>
+                <li>{t(state.lang, 'howToUseStep3')}</li>
+                <li>{t(state.lang, 'howToUseStep4')}</li>
+              </ul>
+              <div className="help-divider" />
+              <p className="help-inspiration">
+                <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: 'middle', marginRight: 4 }}>auto_stories</span>
+                {t(state.lang, 'howToUseInspired')}
+              </p>
+              <p className="help-developer">
+                <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: 'middle', marginRight: 4 }}>person</span>
+                {t(state.lang, 'howToUseDeveloper')}
+              </p>
+            </div>
+            <div className="help-modal-footer">
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => setShowHelp(false)}
+              >
+                {t(state.lang, 'howToUseClose')}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

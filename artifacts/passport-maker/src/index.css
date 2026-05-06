@@ -706,8 +706,14 @@
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  cursor: pointer;
+  cursor: grab;
   transition: transform 0.15s;
+  user-select: none;
+}
+
+.stamp-item.dragging {
+  cursor: grabbing;
+  transition: none;
 }
 
 .stamp-item:hover .stamp-delete-btn {
@@ -933,7 +939,118 @@
   color: var(--theme-primary, #1a56db);
 }
 
-/* ===== Language select ===== */
+/* ===== Help / About modal ===== */
+.help-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.48);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5000;
+  padding: 16px;
+  animation: fadeIn 0.18s ease;
+}
+
+.help-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.help-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.help-close-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: hsl(var(--secondary));
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+
+.help-close-btn:hover {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
+
+.help-modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.help-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.help-steps li {
+  font-size: 14px;
+  line-height: 1.6;
+  color: hsl(var(--foreground));
+  padding: 10px 14px;
+  background: hsl(var(--secondary));
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.help-divider {
+  height: 1px;
+  background: hsl(var(--border));
+  margin: 2px 0;
+}
+
+.help-inspiration {
+  font-size: 13px;
+  line-height: 1.6;
+  color: hsl(var(--muted-foreground));
+  margin: 0;
+  padding: 10px 14px;
+  background: #fffbeb;
+  border-radius: 10px;
+  border-left: 3px solid #f59e0b;
+}
+
+.help-developer {
+  font-size: 13px;
+  line-height: 1.6;
+  color: hsl(var(--muted-foreground));
+  margin: 0;
+  font-weight: 600;
+}
+
+.help-modal-footer {
+  padding: 14px 20px 18px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid hsl(var(--border));
+}
+
+/* ===== Language select (legacy, kept for reference) ===== */
 .lang-select {
   background: rgba(255,255,255,0.15);
   border: 1.5px solid rgba(255,255,255,0.35);
