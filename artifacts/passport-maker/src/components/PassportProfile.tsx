@@ -21,12 +21,11 @@ export default function PassportProfile({ state, mrz, lang }: Props) {
 
   return (
     <div style={{ display: 'flex', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', borderRadius: 8, overflow: 'hidden', position: 'relative' }}>
-      {/* Left page — travel tag design */}
+      {/* Left page — travel tag with creator's message */}
       <div className="passport-cover-left" style={{ width: 330, minHeight: 480 }}>
         {/* Background watermark */}
         <div className="watermark" style={{ opacity: 0.08 }}>
           <div style={{ transform: 'rotate(-45deg)', fontSize: 10, fontWeight: 700, letterSpacing: 2, color: '#fff', textAlign: 'center', lineHeight: 2 }}>
-            NOT AN OFFICIAL DOCUMENT &nbsp; KIDS PLAY PASSPORT &nbsp; NOT AN OFFICIAL DOCUMENT &nbsp; KIDS PLAY PASSPORT &nbsp;
             NOT AN OFFICIAL DOCUMENT &nbsp; KIDS PLAY PASSPORT &nbsp; NOT AN OFFICIAL DOCUMENT &nbsp; KIDS PLAY PASSPORT &nbsp;
             NOT AN OFFICIAL DOCUMENT &nbsp; KIDS PLAY PASSPORT &nbsp; NOT AN OFFICIAL DOCUMENT &nbsp; KIDS PLAY PASSPORT &nbsp;
           </div>
@@ -52,9 +51,9 @@ export default function PassportProfile({ state, mrz, lang }: Props) {
           <div style={{ width: 60, height: 2, background: 'rgba(255,255,255,0.4)', margin: '12px auto' }} />
         </div>
 
-        {/* Travel tag card */}
+        {/* Travel tag — shows creator's message */}
         <div className="travel-tag" style={{ zIndex: 1 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', marginBottom: 8 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', marginBottom: 6 }}>
             Please Look After
           </div>
           <div style={{
@@ -62,15 +61,23 @@ export default function PassportProfile({ state, mrz, lang }: Props) {
             fontSize: 13,
             color: '#fff',
             lineHeight: 1.5,
-            marginBottom: 4,
+            marginBottom: 10,
           }}>
             THIS TRAVELER
           </div>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', marginBottom: 12 }}>
-            {t(lang, 'lookAfterSub')}
+          <div style={{
+            fontSize: 12,
+            color: character.message ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.6)',
+            lineHeight: 1.6,
+            marginBottom: 10,
+            fontStyle: character.message ? 'italic' : 'normal',
+            minHeight: 36,
+            wordBreak: 'keep-all',
+          }}>
+            {character.message || t(lang, 'lookAfterSub')}
           </div>
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: 10, marginTop: 4 }}>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em' }}>PASSPORT NO.</div>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: 8 }}>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', letterSpacing: '0.08em' }}>PASSPORT NO.</div>
             <div style={{ fontFamily: 'monospace', fontSize: 13, color: '#fff', letterSpacing: '0.12em', fontWeight: 700 }}>
               {passportNo}
             </div>
@@ -127,7 +134,7 @@ export default function PassportProfile({ state, mrz, lang }: Props) {
         {/* Profile content */}
         <div style={{ padding: '16px', flex: 1, position: 'relative', zIndex: 1 }}>
           {/* Photo + basic info */}
-          <div style={{ display: 'flex', gap: 14, marginBottom: 14 }}>
+          <div style={{ display: 'flex', gap: 14, marginBottom: 16 }}>
             {/* Photo box */}
             <div style={{
               width: 90,
@@ -148,7 +155,7 @@ export default function PassportProfile({ state, mrz, lang }: Props) {
               )}
             </div>
 
-            {/* Info */}
+            {/* Info rows */}
             <div style={{ flex: 1 }}>
               <InfoRow label={t(lang, 'characterName')} value={character.name || '—'} large />
               <InfoRow label={t(lang, 'dateOfBirth')} value={character.birthdate ? formatDate(character.birthdate) : '—'} />
@@ -156,33 +163,8 @@ export default function PassportProfile({ state, mrz, lang }: Props) {
             </div>
           </div>
 
-          {/* Favorites */}
-          <div style={{ marginBottom: 12 }}>
-            <div style={{
-              fontSize: 9,
-              fontWeight: 700,
-              letterSpacing: '0.1em',
-              color: '#999',
-              textTransform: 'uppercase',
-              marginBottom: 4,
-            }}>
-              {t(lang, 'favoriteThings')}
-            </div>
-            <div style={{
-              fontSize: 13,
-              color: '#333',
-              background: '#f9f9f7',
-              border: '1px solid #eee',
-              borderRadius: 4,
-              padding: '6px 8px',
-              minHeight: 32,
-            }}>
-              {character.favorites || '—'}
-            </div>
-          </div>
-
-          {/* Decorative stamp circle */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+          {/* Decorative stamp + valid circle */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
             <div style={{
               width: 54,
               height: 54,
@@ -193,7 +175,7 @@ export default function PassportProfile({ state, mrz, lang }: Props) {
               alignItems: 'center',
               justifyContent: 'center',
               color: 'var(--theme-primary, #1a56db)',
-              opacity: 0.3,
+              opacity: 0.28,
             }}>
               <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.05em', textAlign: 'center', lineHeight: 1.3 }}>
                 VALID<br />FOR<br />TRAVEL

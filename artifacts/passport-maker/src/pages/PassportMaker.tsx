@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { t } from '@/lib/i18n';
-import { generatePassportNo, generateMRZ, formatDate, todayStr, randomStampProps } from '@/lib/utils';
-import type { AppState, Stamp, Theme, Lang, View } from '@/lib/types';
+import { generatePassportNo, generateMRZ, todayStr, randomStampProps } from '@/lib/utils';
+import type { AppState, Stamp, Theme, Lang } from '@/lib/types';
 import Sidebar from '@/components/Sidebar';
 import PassportProfile from '@/components/PassportProfile';
 import PassportStamps from '@/components/PassportStamps';
@@ -17,6 +17,7 @@ function PassportMaker() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const jsonMenuRef = useRef<HTMLDivElement>(null);
 
   const [state, setState] = useState<AppState>({
     theme: 'blue',
@@ -27,7 +28,7 @@ function PassportMaker() {
       name: '',
       birthdate: '',
       nationality: '',
-      favorites: '',
+      message: '',
     },
     stamps: [],
     passportNo: generatePassportNo(),
@@ -39,6 +40,8 @@ function PassportMaker() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
   const [newStampId, setNewStampId] = useState<string | undefined>(undefined);
+  const [jsonMenuOpen, setJsonMenuOpen] = useState(false);
+  const [mobileTab, setMobileTab] = useState<'edit' | 'preview'>('edit');
 
   const showToast = useCallback((message: string, type: 'success' | 'error' = 'success') => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
@@ -51,6 +54,16 @@ function PassportMaker() {
   }, []);
 
   useEffect(() => () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); }, []);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (jsonMenuRef.current && !jsonMenuRef.current.contains(e.target as Node)) {
+        setJsonMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const update = useCallback((partial: Partial<AppState>) => {
     setState(prev => ({ ...prev, ...partial }));
@@ -104,6 +117,7 @@ function PassportMaker() {
     a.click();
     URL.revokeObjectURL(url);
     showToast(t(state.lang, 'jsonSaved'));
+    setJsonMenuOpen(false);
   };
 
   const loadJson = () => {
@@ -126,6 +140,7 @@ function PassportMaker() {
       reader.readAsText(file);
     };
     input.click();
+    setJsonMenuOpen(false);
   };
 
   const saveImage = async () => {
@@ -161,39 +176,94 @@ function PassportMaker() {
     <div className={`app-layout theme-${state.theme}`}>
       {/* Header */}
       <header className="app-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span className="material-symbols-outlined" style={{ fontSize: 26 }}>travel_explore</span>
-          <span style={{ fontFamily: "'Black Han Sans', sans-serif", fontSize: 18, letterSpacing: '0.02em' }}>
-            {t(state.lang, 'appTitle')}
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, flex: 1 }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 24, flexShrink: 0 }}>travel_explore</span>
+          <span className="app-title">{t(state.lang, 'appTitle')}</span>
         </div>
-        <select
-          data-testid="select-language"
-          className="lang-select"
-          value={state.lang}
-          onChange={e => update({ lang: e.target.value as Lang })}
-        >
-          <option value="ko">한국어</option>
-          <option value="en">English</option>
-          <option value="ja">日本語</option>
-          <option value="id">Bahasa Indonesia</option>
-        </select>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          {/* JSON diskette button */}
+          <div ref={jsonMenuRef} style={{ position: 'relative' }}>
+            <button
+              data-testid="btn-json-menu"
+              className="header-icon-btn"
+              onClick={() => setJsonMenuOpen(v => !v)}
+              title={t(state.lang, 'jsonSaveLoad')}
+              aria-expanded={jsonMenuOpen}
+              aria-haspopup="menu"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 20 }}>save</span>
+            </button>
+            {jsonMenuOpen && (
+              <div className="json-dropdown" role="menu">
+                <button
+                  data-testid="btn-save-json"
+                  className="json-dropdown-item"
+                  onClick={saveJson}
+                  role="menuitem"
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 17 }}>download</span>
+                  {t(state.lang, 'saveJson')}
+                </button>
+                <button
+                  data-testid="btn-load-json"
+                  className="json-dropdown-item"
+                  onClick={loadJson}
+                  role="menuitem"
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 17 }}>upload_file</span>
+                  {t(state.lang, 'loadJson')}
+                </button>
+              </div>
+            )}
+          </div>
+
+          <select
+            data-testid="select-language"
+            className="lang-select"
+            value={state.lang}
+            onChange={e => update({ lang: e.target.value as Lang })}
+          >
+            <option value="ko">한국어</option>
+            <option value="en">English</option>
+            <option value="ja">日本語</option>
+            <option value="id">Bahasa Indonesia</option>
+          </select>
+        </div>
       </header>
 
+      {/* Mobile tab bar */}
+      <div className="mobile-tab-bar" role="tablist">
+        <button
+          className={`mobile-tab-btn${mobileTab === 'edit' ? ' active' : ''}`}
+          onClick={() => setMobileTab('edit')}
+          role="tab"
+          aria-selected={mobileTab === 'edit'}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit_note</span>
+          {t(state.lang, 'editTab')}
+        </button>
+        <button
+          className={`mobile-tab-btn${mobileTab === 'preview' ? ' active' : ''}`}
+          onClick={() => { setMobileTab('preview'); }}
+          role="tab"
+          aria-selected={mobileTab === 'preview'}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>chrome_reader_mode</span>
+          {t(state.lang, 'previewTab')}
+        </button>
+      </div>
+
       {/* Body */}
-      <div className="app-body">
+      <div className={`app-body mobile-tab-${mobileTab}`}>
         <Sidebar
           state={state}
           stampForm={stampForm}
           stampError={stampError}
-          saving={saving}
           onThemeChange={(theme: Theme) => update({ theme })}
           onCharacterChange={updateCharacter}
           onPhotoClick={() => fileInputRef.current?.click()}
           onStampFormChange={(partial) => setStampForm(prev => ({ ...prev, ...partial }))}
           onAddStamp={addStamp}
-          onSaveJson={saveJson}
-          onLoadJson={loadJson}
         />
 
         {/* Hidden file input for photo */}
@@ -209,7 +279,6 @@ function PassportMaker() {
         {/* Canvas area */}
         <div className="canvas-area">
           <div className="canvas-toolbar">
-            {/* View toggle */}
             <div className="toggle-group" role="group" aria-label="Passport view">
               <button
                 data-testid="btn-profile-view"
@@ -242,7 +311,6 @@ function PassportMaker() {
               </button>
             </div>
 
-            {/* Save image */}
             <button
               data-testid="btn-save-image"
               className="btn btn-primary btn-sm"
@@ -260,11 +328,7 @@ function PassportMaker() {
           <div className="canvas-workspace">
             <div ref={canvasRef} className="passport-view-transition">
               {state.view === 'profile' ? (
-                <PassportProfile
-                  state={state}
-                  mrz={mrz}
-                  lang={state.lang}
-                />
+                <PassportProfile state={state} mrz={mrz} lang={state.lang} />
               ) : (
                 <PassportStamps
                   state={state}
