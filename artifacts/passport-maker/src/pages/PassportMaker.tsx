@@ -36,7 +36,10 @@ function PassportMaker() {
       name: '',
       birthdate: '',
       nationality: '',
+      city: '',
       message: '',
+      likes: '',
+      caution: '',
     },
     stamps: [],
     passportNo: generatePassportNo(),
@@ -171,12 +174,20 @@ function PassportMaker() {
       const { default: html2canvas } = await import('html2canvas');
       const el = canvasRef.current;
       if (!el) return;
+      // Remove any CSS zoom so html2canvas captures at 1:1 scale
+      const prevZoom = el.style.zoom;
+      el.style.zoom = '1';
       const canvas = await html2canvas(el, {
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#e8ecf1',
         scale: 2,
+        width: el.scrollWidth,
+        height: el.scrollHeight,
+        windowWidth: el.scrollWidth,
+        windowHeight: el.scrollHeight,
       });
+      el.style.zoom = prevZoom;
       const url = canvas.toDataURL('image/png');
       const a = document.createElement('a');
       a.href = url;
