@@ -86,7 +86,7 @@
   font-family: 'Black Han Sans', sans-serif;
 }
 
-/* Theme CSS variables */
+/* ===== Theme CSS variables ===== */
 .theme-blue {
   --theme-primary: #1a56db;
   --theme-primary-dark: #1048c0;
@@ -135,7 +135,7 @@
   --theme-stamp-border: #7d5a3c;
 }
 
-/* App layout */
+/* ===== App layout ===== */
 .app-layout {
   display: flex;
   flex-direction: column;
@@ -146,15 +146,25 @@
 .app-header {
   background-color: var(--theme-sidebar-bg, #1a56db);
   color: var(--theme-sidebar-text, #ffffff);
-  padding: 0 24px;
-  height: 60px;
+  padding: 0 20px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   flex-shrink: 0;
   box-shadow: 0 2px 10px rgba(0,0,0,0.18);
   z-index: 10;
   transition: background-color 0.3s ease;
+}
+
+.app-title {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-body {
@@ -163,9 +173,114 @@
   overflow: hidden;
 }
 
-/* Sidebar */
+/* ===== Header icon button (JSON diskette) ===== */
+.header-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.3);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.header-icon-btn:hover {
+  background: rgba(255,255,255,0.28);
+  border-color: rgba(255,255,255,0.55);
+}
+
+.header-icon-btn:focus-visible {
+  outline: 3px solid rgba(255,255,255,0.8);
+  outline-offset: 2px;
+}
+
+/* ===== JSON dropdown ===== */
+.json-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #fff;
+  border: 1.5px solid hsl(var(--border));
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+  z-index: 1000;
+  min-width: 168px;
+  overflow: hidden;
+  animation: dropdownIn 0.14s ease;
+}
+
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+.json-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.1s;
+  text-align: left;
+}
+
+.json-dropdown-item:hover {
+  background: hsl(var(--secondary));
+  color: var(--theme-primary, #1a56db);
+}
+
+.json-dropdown-item:not(:last-child) {
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+/* ===== Mobile tab bar ===== */
+.mobile-tab-bar {
+  display: none;
+  background: #fff;
+  border-bottom: 2px solid hsl(var(--border));
+  flex-shrink: 0;
+  z-index: 5;
+}
+
+.mobile-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s;
+  min-height: 48px;
+}
+
+.mobile-tab-btn.active {
+  color: var(--theme-primary, #1a56db);
+  border-bottom-color: var(--theme-primary, #1a56db);
+}
+
+/* ===== Sidebar ===== */
 .sidebar {
-  width: 340px;
+  width: 320px;
   flex-shrink: 0;
   background: #ffffff;
   border-right: 1px solid hsl(var(--border));
@@ -175,7 +290,7 @@
 }
 
 .sidebar-section {
-  padding: 18px 20px;
+  padding: 16px 18px;
   border-bottom: 1px solid hsl(var(--border));
 }
 
@@ -184,14 +299,14 @@
   font-weight: 700;
   letter-spacing: 0.03em;
   color: hsl(var(--foreground));
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   gap: 7px;
 }
 
 .sidebar-section-title .section-icon {
-  font-size: 18px;
+  font-size: 17px;
   color: var(--theme-primary, #1a56db);
   flex-shrink: 0;
 }
@@ -207,7 +322,7 @@
   line-height: 1.4;
 }
 
-/* Canvas area */
+/* ===== Canvas area ===== */
 .canvas-area {
   flex: 1;
   background: #e8ecf1;
@@ -219,7 +334,7 @@
 .canvas-toolbar {
   background: #ffffff;
   border-bottom: 1px solid hsl(var(--border));
-  padding: 8px 20px;
+  padding: 8px 16px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -232,47 +347,55 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px;
+  padding: 28px;
 }
 
-/* Form controls */
+/* ===== Form controls ===== */
 .form-group {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .form-label {
   display: block;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: hsl(var(--foreground));
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 .form-input {
   width: 100%;
-  padding: 11px 14px;
-  border: 2px solid hsl(var(--border));
+  padding: 10px 12px;
+  border: 1.5px solid hsl(var(--border));
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 14px;
   font-family: inherit;
   background: #fff;
   color: hsl(var(--foreground));
   transition: border-color 0.15s, box-shadow 0.15s;
   outline: none;
-  min-height: 46px;
+  min-height: 44px;
 }
 
 .form-input:focus {
   border-color: var(--theme-primary, #1a56db);
-  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.15);
+  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.12);
 }
 
 .form-input::placeholder {
   color: hsl(var(--muted-foreground));
-  font-size: 14px;
+  font-size: 13px;
 }
 
-/* Error message */
+.form-textarea {
+  resize: vertical;
+  min-height: 60px;
+  height: auto;
+  line-height: 1.5;
+  padding-top: 10px;
+}
+
+/* ===== Error message ===== */
 .form-error {
   display: flex;
   align-items: center;
@@ -287,22 +410,22 @@
   margin-bottom: 10px;
 }
 
-/* Buttons */
+/* ===== Buttons ===== */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 11px 18px;
+  gap: 6px;
+  padding: 10px 16px;
   border-radius: 10px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
   transition: all 0.15s;
   border: none;
   white-space: nowrap;
-  min-height: 46px;
+  min-height: 44px;
 }
 
 .btn-primary {
@@ -313,8 +436,8 @@
 
 .btn-primary:hover:not(:disabled) {
   background: var(--theme-primary-dark, #1048c0);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
 }
 
 .btn-primary:active:not(:disabled) {
@@ -330,7 +453,7 @@
 .btn-secondary {
   background: hsl(var(--secondary));
   color: hsl(var(--secondary-foreground));
-  border: 2px solid hsl(var(--border));
+  border: 1.5px solid hsl(var(--border));
 }
 
 .btn-secondary:hover {
@@ -350,7 +473,7 @@
 }
 
 .btn-sm {
-  padding: 9px 14px;
+  padding: 8px 14px;
   font-size: 13px;
   min-height: 40px;
 }
@@ -363,7 +486,7 @@
   padding: 8px;
   border-radius: 8px;
   background: transparent;
-  border: 2px solid hsl(var(--border));
+  border: 1.5px solid hsl(var(--border));
   color: hsl(var(--muted-foreground));
   cursor: pointer;
   display: inline-flex;
@@ -379,10 +502,10 @@
   color: hsl(var(--foreground));
 }
 
-/* Theme chips */
+/* ===== Theme chips ===== */
 .theme-chip {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 3px solid transparent;
   cursor: pointer;
@@ -410,56 +533,74 @@
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 900;
   line-height: 1;
   text-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
 
-/* Photo upload */
-.photo-upload-area {
-  width: 100%;
-  aspect-ratio: 1;
-  border: 3px dashed hsl(var(--border));
-  border-radius: 12px;
+/* ===== Photo upload (compact) ===== */
+.photo-name-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.photo-upload-compact {
+  width: 76px;
+  height: 96px;
+  flex-shrink: 0;
+  border: 2px dashed hsl(var(--border));
+  border-radius: 8px;
   cursor: pointer;
   overflow: hidden;
-  transition: border-color 0.15s, background 0.15s, transform 0.15s;
   background: hsl(var(--secondary));
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   color: hsl(var(--muted-foreground));
-  font-size: 14px;
-  font-weight: 600;
+  transition: border-color 0.15s, background 0.15s;
 }
 
-.photo-upload-area:hover {
+.photo-upload-compact:hover {
   border-color: var(--theme-primary, #1a56db);
   color: var(--theme-primary, #1a56db);
   background: var(--theme-primary-light, #e8f0fe);
-  transform: scale(1.01);
 }
 
-.photo-upload-area img {
+.photo-upload-compact img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-/* Toggle buttons */
+.photo-upload-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* ===== Stamp form row ===== */
+.stamp-form-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+/* ===== Toggle buttons ===== */
 .toggle-group {
   display: flex;
-  border: 2px solid hsl(var(--border));
+  border: 1.5px solid hsl(var(--border));
   border-radius: 10px;
   overflow: hidden;
 }
 
 .toggle-btn {
   flex: 1;
-  padding: 9px 14px;
+  padding: 8px 12px;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -468,7 +609,7 @@
   color: hsl(var(--muted-foreground));
   font-family: inherit;
   transition: all 0.15s;
-  min-height: 42px;
+  min-height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -485,7 +626,7 @@
   color: var(--theme-primary, #1a56db);
 }
 
-/* Passport styles */
+/* ===== Passport styles ===== */
 .passport-book {
   display: flex;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
@@ -558,7 +699,7 @@
   border-top: 1px solid #ddd;
 }
 
-/* Stamp */
+/* ===== Stamp ===== */
 .stamp-item {
   position: absolute;
   display: flex;
@@ -641,7 +782,7 @@
   opacity: 1;
 }
 
-/* Watermark */
+/* ===== Watermark ===== */
 .watermark {
   position: absolute;
   inset: 0;
@@ -663,22 +804,22 @@
   user-select: none;
 }
 
-/* Emoji quick picker */
+/* ===== Emoji quick picker ===== */
 .emoji-picker-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 5px;
+  margin-top: 7px;
 }
 
 .emoji-pick-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  border: 2px solid hsl(var(--border));
+  width: 36px;
+  height: 36px;
+  border-radius: 7px;
+  border: 1.5px solid hsl(var(--border));
   background: hsl(var(--secondary));
   cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -700,7 +841,7 @@
   box-shadow: 0 0 0 2px var(--theme-primary, #1a56db);
 }
 
-/* Stamp success toast */
+/* ===== Toast notification ===== */
 .stamp-toast {
   position: fixed;
   bottom: 48px;
@@ -708,9 +849,9 @@
   transform: translateX(-50%) translateY(0);
   background: #22c55e;
   color: #fff;
-  padding: 12px 22px;
+  padding: 11px 20px;
   border-radius: 100px;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   box-shadow: 0 6px 24px rgba(0,0,0,0.18);
   z-index: 9999;
@@ -747,7 +888,7 @@
   animation: stampBounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Scrollbar styling */
+/* ===== Scrollbar styling ===== */
 .sidebar::-webkit-scrollbar {
   width: 4px;
 }
@@ -759,7 +900,7 @@
   border-radius: 2px;
 }
 
-/* Animated transitions */
+/* ===== View transition ===== */
 .passport-view-transition {
   animation: fadeIn 0.2s ease;
 }
@@ -769,7 +910,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Footer */
+/* ===== Footer ===== */
 .app-footer {
   position: fixed;
   bottom: 12px;
@@ -792,16 +933,16 @@
   color: var(--theme-primary, #1a56db);
 }
 
-/* Language select */
+/* ===== Language select ===== */
 .lang-select {
   background: rgba(255,255,255,0.15);
-  border: 2px solid rgba(255,255,255,0.35);
+  border: 1.5px solid rgba(255,255,255,0.35);
   border-radius: 8px;
   color: #fff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   font-family: inherit;
-  padding: 7px 12px;
+  padding: 6px 10px;
   cursor: pointer;
   outline: none;
   min-height: 40px;
@@ -818,32 +959,32 @@
   color: #222;
 }
 
-/* Section step number */
+/* ===== Section step number ===== */
 .section-step {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: var(--theme-primary, #1a56db);
   color: #fff;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 900;
   flex-shrink: 0;
   line-height: 1;
 }
 
-/* Tag decoration for left passport page */
+/* ===== Travel tag (passport left page card) ===== */
 .travel-tag {
-  border: 3px solid rgba(255,255,255,0.6);
+  border: 2px solid rgba(255,255,255,0.5);
   border-radius: 8px;
-  padding: 20px 16px;
+  padding: 16px 14px;
   text-align: center;
   max-width: 240px;
 }
 
-/* Passport cover ornament */
+/* ===== Passport cover ornament ===== */
 .passport-ornament {
   width: 80px;
   height: 80px;
@@ -853,4 +994,105 @@
   align-items: center;
   justify-content: center;
   font-size: 36px;
+}
+
+/* ===== Responsive: tablet ===== */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 280px;
+  }
+
+  .canvas-workspace {
+    padding: 20px;
+  }
+}
+
+/* ===== Responsive: mobile ===== */
+@media (max-width: 767px) {
+  .app-header {
+    padding: 0 14px;
+    height: 52px;
+  }
+
+  .app-title {
+    font-size: 14px;
+  }
+
+  /* Show mobile tab bar */
+  .mobile-tab-bar {
+    display: flex;
+  }
+
+  /* Stacked body layout */
+  .app-body {
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Show only the active tab on mobile */
+  .app-body.mobile-tab-edit .sidebar {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    overflow-y: auto;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .app-body.mobile-tab-edit .canvas-area {
+    display: none;
+  }
+
+  .app-body.mobile-tab-preview .sidebar {
+    display: none;
+  }
+
+  .app-body.mobile-tab-preview .canvas-area {
+    display: flex;
+    flex: 1;
+  }
+
+  /* Sidebar full-width on mobile */
+  .sidebar {
+    width: 100%;
+  }
+
+  .sidebar-section {
+    padding: 14px 16px;
+  }
+
+  /* Canvas workspace — allow horizontal scroll for passport */
+  .canvas-workspace {
+    padding: 16px 12px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    overflow: auto;
+  }
+
+  /* Scale down passport to fit mobile */
+  .passport-view-transition {
+    transform-origin: top left;
+    zoom: 0.52;
+  }
+
+  /* Stamp form row: keep side by side on mobile (full width available) */
+  .stamp-form-row {
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  /* Footer above system nav */
+  .app-footer {
+    bottom: 8px;
+    right: 10px;
+  }
+
+  .canvas-toolbar {
+    padding: 7px 12px;
+  }
+
+  .toggle-btn {
+    font-size: 12px;
+    padding: 7px 10px;
+  }
 }

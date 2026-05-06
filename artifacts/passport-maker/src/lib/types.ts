@@ -18,7 +18,7 @@ export interface CharacterState {
   name: string;
   birthdate: string;
   nationality: string;
-  favorites: string;
+  message: string;
 }
 
 export interface AppState {
