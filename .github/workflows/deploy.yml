@@ -39,7 +39,7 @@ jobs:
       - name: Build frontend
         run: pnpm --filter @workspace/passport-maker run build
         env:
-          BASE_PATH: /
+          BASE_PATH: /passport/
           NODE_ENV: production
 
       - name: Upload Pages artifact
