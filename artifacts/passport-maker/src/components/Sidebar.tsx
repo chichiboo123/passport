@@ -22,6 +22,14 @@ const THEMES: { id: Theme; color: string; label: string }[] = [
   { id: 'brown', color: '#7d5a3c', label: '갈색' },
 ];
 
+// 여행 관련 인기 이모지 목록 (어린이가 자주 쓰는 것)
+const QUICK_EMOJIS = [
+  '✈️', '🚀', '🌟', '⭐', '🎉', '🎊',
+  '🗼', '🗽', '🏯', '🗻', '🌋', '🏖️',
+  '🏔️', '🎡', '🎢', '🌈', '🦁', '🐬',
+  '🐼', '🦊', '🌸', '🍦', '🎶', '🏆',
+];
+
 export default function Sidebar({
   state,
   stampForm,
@@ -35,13 +43,19 @@ export default function Sidebar({
   onLoadJson,
 }: SidebarProps) {
   const lang: Lang = state.lang;
+  const stampCount = state.stamps.length;
 
   return (
     <aside className="sidebar" role="complementary" aria-label="Editor panel">
-      {/* Section: Theme */}
+
+      {/* Section 1: Theme */}
       <div className="sidebar-section">
-        <div className="sidebar-section-title">{t(lang, 'themeColor')}</div>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div className="sidebar-section-title">
+          <span className="section-step">1</span>
+          <span className="material-symbols-outlined section-icon">palette</span>
+          {t(lang, 'themeColor')}
+        </div>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           {THEMES.map(th => (
             <button
               key={th.id}
@@ -56,9 +70,13 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Section: Character info */}
+      {/* Section 2: Character info */}
       <div className="sidebar-section">
-        <div className="sidebar-section-title">{t(lang, 'characterInfo')}</div>
+        <div className="sidebar-section-title">
+          <span className="section-step">2</span>
+          <span className="material-symbols-outlined section-icon">person</span>
+          {t(lang, 'characterInfo')}
+        </div>
 
         {/* Photo */}
         <div className="form-group">
@@ -71,13 +89,13 @@ export default function Sidebar({
             tabIndex={0}
             aria-label={t(lang, 'photoUploadHint')}
             onKeyDown={e => e.key === 'Enter' && onPhotoClick()}
-            style={{ maxHeight: 140 }}
+            style={{ maxHeight: 150 }}
           >
             {state.character.photo ? (
               <img src={state.character.photo} alt="Character" />
             ) : (
               <>
-                <span className="material-symbols-outlined" style={{ fontSize: 32 }}>add_a_photo</span>
+                <span className="material-symbols-outlined" style={{ fontSize: 36 }}>add_a_photo</span>
                 <span>{t(lang, 'photoUploadHint')}</span>
               </>
             )}
@@ -126,7 +144,7 @@ export default function Sidebar({
         </div>
 
         {/* Favorites */}
-        <div className="form-group">
+        <div className="form-group" style={{ marginBottom: 0 }}>
           <label className="form-label" htmlFor="char-fav">{t(lang, 'favorites')}</label>
           <input
             id="char-fav"
@@ -140,12 +158,20 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Section: Stamp form */}
+      {/* Section 3: Stamp form */}
       <div className="sidebar-section">
-        <div className="sidebar-section-title">{t(lang, 'addStamp')}</div>
+        <div className="sidebar-section-title">
+          <span className="section-step">3</span>
+          <span className="material-symbols-outlined section-icon">approval</span>
+          {t(lang, 'addStamp')}
+          {stampCount > 0 && (
+            <span className="section-badge">{stampCount}</span>
+          )}
+        </div>
 
+        {/* Emoji quick picker */}
         <div className="form-group">
-          <label className="form-label" htmlFor="stamp-emoji">{t(lang, 'stampEmoji')}</label>
+          <label className="form-label">{t(lang, 'stampEmoji')}</label>
           <input
             id="stamp-emoji"
             data-testid="input-stamp-emoji"
@@ -154,8 +180,22 @@ export default function Sidebar({
             placeholder={t(lang, 'emojiPlaceholder')}
             value={stampForm.emoji}
             onChange={e => onStampFormChange({ emoji: e.target.value })}
-            style={{ fontSize: 20 }}
+            style={{ fontSize: 22, textAlign: 'center', letterSpacing: '0.1em' }}
           />
+          <div className="emoji-picker-grid" role="group" aria-label={t(lang, 'quickEmojiSelect')}>
+            {QUICK_EMOJIS.map(emoji => (
+              <button
+                key={emoji}
+                type="button"
+                className={`emoji-pick-btn${stampForm.emoji === emoji ? ' selected' : ''}`}
+                onClick={() => onStampFormChange({ emoji })}
+                aria-label={emoji}
+                title={emoji}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="form-group">
@@ -184,30 +224,38 @@ export default function Sidebar({
         </div>
 
         {stampError && (
-          <p style={{ color: '#c0392b', fontSize: 12, marginBottom: 8 }}>{stampError}</p>
+          <div className="form-error" role="alert">
+            <span className="material-symbols-outlined" style={{ fontSize: 18, flexShrink: 0 }}>error</span>
+            {stampError}
+          </div>
         )}
 
         <button
           data-testid="btn-add-stamp"
           className="btn btn-primary btn-full"
           onClick={onAddStamp}
+          style={{ fontSize: 16, gap: 8 }}
         >
-          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>approval</span>
+          <span className="material-symbols-outlined" style={{ fontSize: 20 }}>approval</span>
           {t(lang, 'addStampBtn')}
         </button>
       </div>
 
-      {/* Section: Data management */}
+      {/* Section 4: Data management */}
       <div className="sidebar-section">
-        <div className="sidebar-section-title">{t(lang, 'dataManagement')}</div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="sidebar-section-title">
+          <span className="section-step">4</span>
+          <span className="material-symbols-outlined section-icon">save</span>
+          {t(lang, 'dataManagement')}
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
           <button
             data-testid="btn-save-json"
             className="btn btn-secondary btn-sm"
             onClick={onSaveJson}
             style={{ flex: 1 }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: 14 }}>save</span>
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>save</span>
             {t(lang, 'saveJson')}
           </button>
           <button
@@ -216,7 +264,7 @@ export default function Sidebar({
             onClick={onLoadJson}
             style={{ flex: 1 }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: 14 }}>upload_file</span>
+            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>upload_file</span>
             {t(lang, 'loadJson')}
           </button>
         </div>

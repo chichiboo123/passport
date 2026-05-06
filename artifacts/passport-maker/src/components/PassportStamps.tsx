@@ -6,9 +6,10 @@ interface Props {
   state: AppState;
   lang: Lang;
   onDeleteStamp: (id: string) => void;
+  newStampId?: string;
 }
 
-export default function PassportStamps({ state, lang, onDeleteStamp }: Props) {
+export default function PassportStamps({ state, lang, onDeleteStamp, newStampId }: Props) {
   const { stamps, theme } = state;
 
   return (
@@ -21,6 +22,7 @@ export default function PassportStamps({ state, lang, onDeleteStamp }: Props) {
         onDeleteStamp={onDeleteStamp}
         pageLabel="VISAS"
         isEmpty={stamps.length === 0}
+        newStampId={newStampId}
       />
 
       {/* Spine */}
@@ -35,6 +37,7 @@ export default function PassportStamps({ state, lang, onDeleteStamp }: Props) {
         pageLabel="VISAS"
         isEmpty={false}
         hideEmpty
+        newStampId={newStampId}
       />
     </div>
   );
@@ -48,9 +51,10 @@ interface StampPageProps {
   pageLabel: string;
   isEmpty: boolean;
   hideEmpty?: boolean;
+  newStampId?: string;
 }
 
-function StampPage({ stamps, lang, theme, onDeleteStamp, isEmpty, hideEmpty }: StampPageProps) {
+function StampPage({ stamps, lang, theme, onDeleteStamp, isEmpty, hideEmpty, newStampId }: StampPageProps) {
   return (
     <div style={{
       width: 330,
@@ -119,30 +123,31 @@ function StampPage({ stamps, lang, theme, onDeleteStamp, isEmpty, hideEmpty }: S
         top: 0,
         left: 0,
         right: 0,
-        height: 24,
+        height: 26,
         background: `var(--theme-passport-cover, #1a3a6b)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 2,
       }}>
-        <span style={{ fontFamily: "'Black Han Sans', sans-serif", fontSize: 9, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.85)' }}>
+        <span style={{ fontFamily: "'Black Han Sans', sans-serif", fontSize: 10, letterSpacing: '0.15em', color: 'rgba(255,255,255,0.85)' }}>
           STAMPS & VISAS
         </span>
       </div>
 
       {/* Stamps */}
-      <div style={{ position: 'absolute', inset: 24, zIndex: 1 }}>
+      <div style={{ position: 'absolute', inset: 26, zIndex: 1 }}>
         {stamps.map(stamp => (
           <StampItem
             key={stamp.id}
             stamp={stamp}
             onDelete={() => onDeleteStamp(stamp.id)}
+            isNew={stamp.id === newStampId}
           />
         ))}
       </div>
 
-      {/* Empty state */}
+      {/* Empty state — friendlier for kids */}
       {isEmpty && !hideEmpty && (
         <div style={{
           position: 'absolute',
@@ -151,33 +156,51 @@ function StampPage({ stamps, lang, theme, onDeleteStamp, isEmpty, hideEmpty }: S
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 8,
+          gap: 10,
           zIndex: 2,
           pointerEvents: 'none',
+          padding: 24,
         }}>
-          <span className="material-symbols-outlined" style={{ fontSize: 40, color: '#ccc' }}>approval</span>
-          <span style={{ fontSize: 12, color: '#bbb' }}>{t(lang, 'noStamps')}</span>
+          <div style={{ fontSize: 48 }}>✈️</div>
+          <div style={{
+            fontSize: 14,
+            fontWeight: 700,
+            color: '#aaa',
+            textAlign: 'center',
+            lineHeight: 1.5,
+          }}>
+            {t(lang, 'noStamps')}
+          </div>
+          <div style={{
+            fontSize: 12,
+            color: '#bbb',
+            textAlign: 'center',
+            lineHeight: 1.5,
+          }}>
+            {t(lang, 'noStampsSub')}
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-function StampItem({ stamp, onDelete }: { stamp: Stamp; onDelete: () => void }) {
+function StampItem({ stamp, onDelete, isNew }: { stamp: Stamp; onDelete: () => void; isNew?: boolean }) {
   const { emoji, place, date, x, y, rotation, color } = stamp;
 
   return (
     <div
       data-testid={`stamp-item-${stamp.id}`}
-      className="stamp-item"
+      className={`stamp-item${isNew ? ' new-stamp' : ''}`}
       style={{
         position: 'absolute',
         left: `${x}%`,
         top: `${y}%`,
         transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+        '--r': `${rotation}deg`,
         color: color,
         zIndex: 2,
-      }}
+      } as React.CSSProperties}
     >
       <div className="stamp-circle" style={{ borderColor: color, boxShadow: `inset 0 0 0 2px ${color}` }}>
         <div className="stamp-emoji">{emoji}</div>
@@ -185,7 +208,7 @@ function StampItem({ stamp, onDelete }: { stamp: Stamp; onDelete: () => void }) 
           {place}
         </div>
 
-        {/* Delete button */}
+        {/* Delete button — always visible at reduced opacity for touch accessibility */}
         <button
           data-testid={`btn-delete-stamp-${stamp.id}`}
           className="stamp-delete-btn"
