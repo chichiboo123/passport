@@ -8,6 +8,7 @@ A Canva-like web editor where children create virtual travel passports for their
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
+- `pnpm --filter @workspace/scripts run sync-github` — push latest code to GitHub (requires `GITHUB_PERSONAL_ACCESS_TOKEN` secret)
 - No database required (fully client-side)
 
 ## Stack
