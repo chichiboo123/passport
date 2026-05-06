@@ -19,7 +19,10 @@ export interface CharacterState {
   name: string;
   birthdate: string;
   nationality: string;
+  city: string;
   message: string;
+  likes: string;
+  caution: string;
 }
 
 export interface AppState {

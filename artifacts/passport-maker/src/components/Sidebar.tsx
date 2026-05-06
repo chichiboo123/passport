@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { t } from '@/lib/i18n';
 import type { AppState, Theme, Lang } from '@/lib/types';
 
@@ -40,6 +40,7 @@ export default function Sidebar({
   const lang: Lang = state.lang;
   const stampCount = state.stamps.length;
   const stampImageInputRef = useRef<HTMLInputElement>(null);
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
 
   const handleStampImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -85,7 +86,7 @@ export default function Sidebar({
           {t(lang, 'characterInfo')}
         </div>
 
-        {/* Photo + Name/Birthdate side by side */}
+        {/* Photo + Name/Birthdate */}
         <div className="photo-name-row">
           <div
             data-testid="area-photo-upload"
@@ -106,7 +107,7 @@ export default function Sidebar({
             )}
           </div>
 
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 7, minWidth: 0 }}>
             <div>
               <label className="form-label" htmlFor="char-name">{t(lang, 'characterName')}</label>
               <input
@@ -133,22 +134,36 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* Nationality */}
-        <div className="form-group" style={{ marginTop: 10 }}>
-          <label className="form-label" htmlFor="char-nat">{t(lang, 'nationality')}</label>
-          <input
-            id="char-nat"
-            data-testid="input-nationality"
-            className="form-input"
-            type="text"
-            placeholder={t(lang, 'nationalityPlaceholder')}
-            value={state.character.nationality}
-            onChange={e => onCharacterChange({ nationality: e.target.value })}
-          />
+        {/* Nationality + City in one row */}
+        <div className="stamp-form-row" style={{ marginTop: 8, marginBottom: 0 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <label className="form-label" htmlFor="char-nat">{t(lang, 'nationality')}</label>
+            <input
+              id="char-nat"
+              data-testid="input-nationality"
+              className="form-input"
+              type="text"
+              placeholder={t(lang, 'nationalityPlaceholder')}
+              value={state.character.nationality}
+              onChange={e => onCharacterChange({ nationality: e.target.value })}
+            />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <label className="form-label" htmlFor="char-city">{t(lang, 'city')}</label>
+            <input
+              id="char-city"
+              data-testid="input-city"
+              className="form-input"
+              type="text"
+              placeholder={t(lang, 'cityPlaceholder')}
+              value={state.character.city}
+              onChange={e => onCharacterChange({ city: e.target.value })}
+            />
+          </div>
         </div>
 
-        {/* Message to those who meet the character */}
-        <div className="form-group" style={{ marginBottom: 0 }}>
+        {/* Message: 캐릭터를 만날 사람들에게 */}
+        <div className="form-group" style={{ marginTop: 8, marginBottom: 6 }}>
           <label className="form-label" htmlFor="char-msg">{t(lang, 'favorites')}</label>
           <textarea
             id="char-msg"
@@ -159,6 +174,34 @@ export default function Sidebar({
             onChange={e => onCharacterChange({ message: e.target.value })}
             rows={2}
           />
+        </div>
+
+        {/* Likes + Caution in one row */}
+        <div className="stamp-form-row" style={{ marginBottom: 0 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <label className="form-label" htmlFor="char-likes">{t(lang, 'likesLabel')}</label>
+            <textarea
+              id="char-likes"
+              data-testid="input-likes"
+              className="form-input form-textarea"
+              placeholder={t(lang, 'likesPlaceholder')}
+              value={state.character.likes}
+              onChange={e => onCharacterChange({ likes: e.target.value })}
+              rows={2}
+            />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <label className="form-label" htmlFor="char-caution">{t(lang, 'cautionLabel')}</label>
+            <textarea
+              id="char-caution"
+              data-testid="input-caution"
+              className="form-input form-textarea"
+              placeholder={t(lang, 'cautionPlaceholder')}
+              value={state.character.caution}
+              onChange={e => onCharacterChange({ caution: e.target.value })}
+              rows={2}
+            />
+          </div>
         </div>
       </div>
 
@@ -173,37 +216,57 @@ export default function Sidebar({
           )}
         </div>
 
-        {/* Emoji quick picker */}
+        {/* Emoji input + collapsible quick picker */}
         <div className="form-group">
           <label className="form-label">{t(lang, 'stampEmoji')}</label>
-          <input
-            id="stamp-emoji"
-            data-testid="input-stamp-emoji"
-            className="form-input"
-            type="text"
-            placeholder={t(lang, 'emojiPlaceholder')}
-            value={stampForm.emoji}
-            onChange={e => onStampFormChange({ emoji: e.target.value, image: '' })}
-            style={{ fontSize: 20, textAlign: 'center', letterSpacing: '0.1em' }}
-          />
-          <div className="emoji-picker-grid" role="group" aria-label={t(lang, 'quickEmojiSelect')}>
-            {QUICK_EMOJIS.map(emoji => (
-              <button
-                key={emoji}
-                type="button"
-                className={`emoji-pick-btn${stampForm.emoji === emoji && !stampForm.image ? ' selected' : ''}`}
-                onClick={() => onStampFormChange({ emoji, image: '' })}
-                aria-label={emoji}
-                title={emoji}
-              >
-                {emoji}
-              </button>
-            ))}
+
+          {/* Emoji text input + picker toggle on same line */}
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <input
+              id="stamp-emoji"
+              data-testid="input-stamp-emoji"
+              className="form-input"
+              type="text"
+              placeholder={t(lang, 'emojiPlaceholder')}
+              value={stampForm.emoji}
+              onChange={e => onStampFormChange({ emoji: e.target.value, image: '' })}
+              style={{ fontSize: 20, textAlign: 'center', letterSpacing: '0.1em', flex: 1, minWidth: 0 }}
+            />
+            <button
+              type="button"
+              className="btn btn-sm btn-secondary"
+              style={{ flexShrink: 0, padding: '6px 10px', fontSize: 12, minHeight: 40, whiteSpace: 'nowrap' }}
+              onClick={() => setEmojiPickerOpen(v => !v)}
+              aria-expanded={emojiPickerOpen}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                {emojiPickerOpen ? 'expand_less' : 'expand_more'}
+              </span>
+              {emojiPickerOpen ? t(lang, 'emojiToggleClose').replace(/[▲▼]\s*/, '') : t(lang, 'quickEmojiSelect').slice(0, 4)}
+            </button>
           </div>
+
+          {/* Collapsible emoji grid */}
+          {emojiPickerOpen && (
+            <div className="emoji-picker-grid" role="group" aria-label={t(lang, 'quickEmojiSelect')} style={{ marginTop: 7 }}>
+              {QUICK_EMOJIS.map(emoji => (
+                <button
+                  key={emoji}
+                  type="button"
+                  className={`emoji-pick-btn${stampForm.emoji === emoji && !stampForm.image ? ' selected' : ''}`}
+                  onClick={() => { onStampFormChange({ emoji, image: '' }); setEmojiPickerOpen(false); }}
+                  aria-label={emoji}
+                  title={emoji}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Image upload for stamp */}
           <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 12, color: 'hsl(var(--muted-foreground))', flexShrink: 0 }}>
+            <span style={{ fontSize: 11, color: 'hsl(var(--muted-foreground))', flexShrink: 0 }}>
               {t(lang, 'stampImageLabel')}
             </span>
             {stampForm.image ? (
@@ -211,12 +274,12 @@ export default function Sidebar({
                 <img
                   src={stampForm.image}
                   alt="stamp preview"
-                  style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--theme-primary, #1a56db)' }}
+                  style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--theme-primary, #1a56db)' }}
                 />
                 <button
                   type="button"
                   className="btn btn-sm btn-secondary"
-                  style={{ padding: '4px 10px', fontSize: 12, minHeight: 28 }}
+                  style={{ padding: '3px 9px', fontSize: 12, minHeight: 26 }}
                   onClick={() => onStampFormChange({ image: '' })}
                 >
                   {t(lang, 'stampImageClear')}
@@ -226,10 +289,10 @@ export default function Sidebar({
               <button
                 type="button"
                 className="btn btn-sm btn-secondary"
-                style={{ padding: '4px 10px', fontSize: 12, minHeight: 28 }}
+                style={{ padding: '3px 9px', fontSize: 12, minHeight: 26 }}
                 onClick={() => stampImageInputRef.current?.click()}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: 15 }}>image</span>
+                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>image</span>
                 {t(lang, 'stampImageBtn')}
               </button>
             )}
@@ -243,7 +306,7 @@ export default function Sidebar({
           />
         </div>
 
-        {/* Place + Date in one row */}
+        {/* Place + Date */}
         <div className="stamp-form-row">
           <div style={{ flex: 1, minWidth: 0 }}>
             <label className="form-label" htmlFor="stamp-place">{t(lang, 'visitPlace')}</label>
