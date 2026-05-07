@@ -1,0 +1,5 @@
+# App Gallery Metadata Analysis
+
+| 분류 | 이름 | 영문명 | 소개 | 기능 | 키워드 | 해시태그 | 개발년도 | URL | Key Features | Functions | Keywords | Hashtags | Categories |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 인문·창작 | 캐릭터 여행 여권 만들기 | Character Travel Passport | 캐릭터의 프로필과 여행 스탬프를 한 화면에서 꾸며 나만의 여권 이미지를 만드는 창작형 웹앱 | 테마 색상 선택 / 캐릭터 정보 입력(사진·이름·생일·국적·도시·메시지) / 이모지·이미지 기반 여행 스탬프 추가 / 스탬프 드래그 배치 및 삭제 / JSON 저장·불러오기 / PNG 이미지 저장 | 캐릭터창작, 디지털스토리텔링, 여행스탬프 | #캐릭터 #여권만들기 #디지털창작 | 2026 | 여기에 최종 서비스 URL 입력 | A creative web app for designing a personalized character passport by combining profile details and travel stamp pages in a single editable canvas. | Choose theme colors / Enter character profile (photo, name, birthday, nationality, city, message) / Add travel stamps with emoji or uploaded images / Drag and delete stamps on visa pages / Save and load JSON data / Export as PNG image | Character Creation, Digital Storytelling, Travel Stamps | #Character #PassportMaker #DigitalCreation | humanities-creation |
