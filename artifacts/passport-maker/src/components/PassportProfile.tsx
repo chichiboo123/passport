@@ -88,6 +88,7 @@ export default function PassportProfile({ state, mrz, lang }: Props) {
             fontStyle: character.message ? 'italic' : 'normal',
             minHeight: 36,
             wordBreak: 'keep-all',
+            whiteSpace: 'pre-line',
           }}>
             {character.message || t(lang, 'lookAfterSub')}
           </div>
@@ -183,7 +184,7 @@ export default function PassportProfile({ state, mrz, lang }: Props) {
 
             {/* Info rows */}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <InfoRow label={t(lang, 'characterName')} value={character.name || '—'} large />
+              <InfoRow label={t(lang, 'nameLabel')} value={character.name || '—'} large />
               <InfoRow label={t(lang, 'dateOfBirth')} value={character.birthdate ? formatDate(character.birthdate) : '—'} />
               <InfoRow label={t(lang, 'nationality2')} value={character.nationality || '—'} />
               <InfoRow label={t(lang, 'cityPassport')} value={character.city || '—'} />
@@ -266,7 +267,6 @@ function SubField({ icon, label, value, accentColor }: { icon: string; label: st
       background: '#f5f5f0',
       borderRadius: 6,
       padding: '5px 9px',
-      borderLeft: `3px solid ${accentColor}`,
       flex: 1,
       overflow: 'hidden',
     }}>
@@ -283,10 +283,9 @@ function SubField({ icon, label, value, accentColor }: { icon: string; label: st
         color: value ? '#333' : '#bbb',
         lineHeight: 1.4,
         overflow: 'hidden',
-        display: '-webkit-box',
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: 'vertical',
-      } as React.CSSProperties}>
+        whiteSpace: 'pre-line',
+        wordBreak: 'break-word',
+      }}>
         {value || '—'}
       </div>
     </div>
