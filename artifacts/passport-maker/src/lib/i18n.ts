@@ -2,7 +2,7 @@ export type Lang = 'ko' | 'en' | 'ja' | 'id';
 
 export const translations: Record<Lang, Record<string, string>> = {
   ko: {
-    appTitle: '캐릭터 여행 여권 만들기',
+    appTitle: '캐릭터 여권 제작소',
     themeColor: '테마 색상',
     characterInfo: '캐릭터 정보',
     photoUpload: '사진',
@@ -40,7 +40,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     stampView: '스탬프',
     saveImage: '이미지 저장',
     passportTitle: 'CHARACTER\nTRAVEL PASSPORT',
-    passportSubtitle: '캐릭터 여행 여권',
+    passportSubtitle: '캐릭터 여권 제작소',
     lookAfter: 'PLEASE LOOK AFTER\nTHIS TRAVELER',
     lookAfterSub: '이 여행자를 잘 부탁드립니다',
     travelerName: '여행자 이름',
@@ -82,7 +82,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     howToUseDeveloper: '개발자 : 교육뮤지컬 꿈꾸는 치수쌤',
   },
   en: {
-    appTitle: 'Character Travel Passport',
+    appTitle: 'Character Passport Studio',
     themeColor: 'Theme Color',
     characterInfo: 'Character Info',
     photoUpload: 'Photo',
@@ -120,7 +120,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     stampView: 'Stamps',
     saveImage: 'Save Image',
     passportTitle: 'CHARACTER\nTRAVEL PASSPORT',
-    passportSubtitle: 'Character Travel Passport',
+    passportSubtitle: 'Character Passport Studio',
     lookAfter: 'PLEASE LOOK AFTER\nTHIS TRAVELER',
     lookAfterSub: 'Thank you for your kindness',
     travelerName: 'Traveler Name',
@@ -162,7 +162,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     howToUseDeveloper: 'Developer: Chisoo Teacher (교육뮤지컬 꿈꾸는 치수쌤)',
   },
   ja: {
-    appTitle: 'キャラクター旅行パスポート',
+    appTitle: 'キャラクターパスポート工房',
     themeColor: 'テーマカラー',
     characterInfo: 'キャラクター情報',
     photoUpload: '写真',
@@ -200,7 +200,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     stampView: 'スタンプ',
     saveImage: '画像を保存',
     passportTitle: 'CHARACTER\nTRAVEL PASSPORT',
-    passportSubtitle: 'キャラクター旅行パスポート',
+    passportSubtitle: 'キャラクターパスポート工房',
     lookAfter: 'PLEASE LOOK AFTER\nTHIS TRAVELER',
     lookAfterSub: 'この旅人をよろしくお願いします',
     travelerName: '旅行者名',
@@ -242,7 +242,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     howToUseDeveloper: '開発者：교육뮤지컬 꿈꾸는 치수쌤',
   },
   id: {
-    appTitle: 'Paspor Perjalanan Karakter',
+    appTitle: 'Studio Paspor Karakter',
     themeColor: 'Warna Tema',
     characterInfo: 'Info Karakter',
     photoUpload: 'Foto',
@@ -280,7 +280,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     stampView: 'Stempel',
     saveImage: 'Simpan Gambar',
     passportTitle: 'CHARACTER\nTRAVEL PASSPORT',
-    passportSubtitle: 'Paspor Perjalanan Karakter',
+    passportSubtitle: 'Studio Paspor Karakter',
     lookAfter: 'PLEASE LOOK AFTER\nTHIS TRAVELER',
     lookAfterSub: 'Tolong jaga wisatawan ini',
     travelerName: 'Nama Wisatawan',
