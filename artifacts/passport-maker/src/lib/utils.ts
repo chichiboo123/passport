@@ -5,13 +5,21 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+const POSITIVE_WORDS = [
+  'JOY', 'HOPE', 'LOVE', 'STAR', 'DREAM', 'SMILE', 'HAPPY', 'BRAVE',
+  'KIND', 'SUNNY', 'LUCKY', 'PEACE', 'MAGIC', 'SPARK', 'BLOOM',
+  'LIGHT', 'GLOW', 'SHINE', 'SWEET', 'WISH',
+];
+
 export function generatePassportNo(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-  const nums = '0123456789';
-  let result = '';
-  for (let i = 0; i < 2; i++) result += chars[Math.floor(Math.random() * chars.length)];
-  for (let i = 0; i < 7; i++) result += nums[Math.floor(Math.random() * nums.length)];
-  return result;
+  const word = POSITIVE_WORDS[Math.floor(Math.random() * POSITIVE_WORDS.length)];
+  const now = new Date();
+  const yy = String(now.getFullYear()).slice(2);
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  const hh = String(now.getHours()).padStart(2, '0');
+  const min = String(now.getMinutes()).padStart(2, '0');
+  return `${word}${yy}${mm}${dd}${hh}${min}`;
 }
 
 export function generateMRZ(name: string, nationality: string, birthdate: string, passportNo: string): [string, string] {
