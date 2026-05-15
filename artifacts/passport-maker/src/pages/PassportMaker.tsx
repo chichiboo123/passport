@@ -171,13 +171,15 @@ function PassportMaker() {
   const saveImage = async () => {
     if (saving) return;
     setSaving(true);
+    const el = canvasRef.current;
+    let prevAnimation = '';
+    let prevZoom = '';
     try {
       const { default: html2canvas } = await import('html2canvas');
-      const el = canvasRef.current;
       if (!el) return;
       // Temporarily disable animation and reset zoom so html2canvas captures cleanly
-      const prevAnimation = el.style.animation;
-      const prevZoom = el.style.zoom;
+      prevAnimation = el.style.animation;
+      prevZoom = el.style.zoom;
       el.style.animation = 'none';
       el.style.zoom = '1';
       // Wait one frame to ensure layout is stable after style changes
@@ -185,7 +187,7 @@ function PassportMaker() {
       const canvas = await html2canvas(el, {
         useCORS: true,
         allowTaint: true,
-        backgroundColor: null,
+        backgroundColor: '#ffffff',
         scale: 2,
         width: el.scrollWidth,
         height: el.scrollHeight,
@@ -193,18 +195,22 @@ function PassportMaker() {
         windowHeight: el.scrollHeight,
         logging: false,
       });
-      el.style.animation = prevAnimation;
-      el.style.zoom = prevZoom;
       const url = canvas.toDataURL('image/png');
       const a = document.createElement('a');
       a.href = url;
       a.download = `passport-${state.character.name || 'character'}.png`;
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       showToast(t(state.lang, 'imageSaved'));
     } catch (err) {
       console.error('Failed to save image:', err);
       showToast(t(state.lang, 'imageSaveError'), 'error');
     } finally {
+      if (el) {
+        el.style.animation = prevAnimation;
+        el.style.zoom = prevZoom;
+      }
       setSaving(false);
     }
   };
