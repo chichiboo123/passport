@@ -26,6 +26,8 @@ function PassportMaker() {
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const jsonMenuRef = useRef<HTMLDivElement>(null);
   const langMenuRef = useRef<HTMLDivElement>(null);
+  const textMenuRef = useRef<HTMLDivElement>(null);
+  const imageMenuRef = useRef<HTMLDivElement>(null);
 
   const [state, setState] = useState<AppState>({
     theme: 'blue',
@@ -53,6 +55,8 @@ function PassportMaker() {
   const [newStampId, setNewStampId] = useState<string | undefined>(undefined);
   const [jsonMenuOpen, setJsonMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [textMenuOpen, setTextMenuOpen] = useState(false);
+  const [imageMenuOpen, setImageMenuOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [mobileTab, setMobileTab] = useState<'edit' | 'preview'>('edit');
   const [sidebarWidth, setSidebarWidth] = useState(320);
@@ -76,6 +80,12 @@ function PassportMaker() {
       }
       if (langMenuRef.current && !langMenuRef.current.contains(e.target as Node)) {
         setLangMenuOpen(false);
+      }
+      if (textMenuRef.current && !textMenuRef.current.contains(e.target as Node)) {
+        setTextMenuOpen(false);
+      }
+      if (imageMenuRef.current && !imageMenuRef.current.contains(e.target as Node)) {
+        setImageMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handler);
@@ -168,23 +178,18 @@ function PassportMaker() {
     setJsonMenuOpen(false);
   };
 
-  const saveImage = async () => {
-    if (saving) return;
-    setSaving(true);
+  // Renders the passport element to an HTMLCanvasElement via html2canvas
+  const renderPassportCanvas = useCallback(async (): Promise<HTMLCanvasElement> => {
+    const { default: html2canvas } = await import('html2canvas');
     const el = canvasRef.current;
-    let prevAnimation = '';
-    let prevZoom = '';
+    if (!el) throw new Error('canvas not mounted');
+    const prevAnimation = el.style.animation;
+    const prevZoom = el.style.zoom;
+    el.style.animation = 'none';
+    el.style.zoom = '1';
+    await new Promise(resolve => requestAnimationFrame(resolve));
     try {
-      const { default: html2canvas } = await import('html2canvas');
-      if (!el) return;
-      // Temporarily disable animation and reset zoom so html2canvas captures cleanly
-      prevAnimation = el.style.animation;
-      prevZoom = el.style.zoom;
-      el.style.animation = 'none';
-      el.style.zoom = '1';
-      // Wait one frame to ensure layout is stable after style changes
-      await new Promise(resolve => requestAnimationFrame(resolve));
-      const canvas = await html2canvas(el, {
+      return await html2canvas(el, {
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
@@ -195,10 +200,22 @@ function PassportMaker() {
         windowHeight: el.scrollHeight,
         logging: false,
       });
-      const url = canvas.toDataURL('image/png');
+    } finally {
+      el.style.animation = prevAnimation;
+      el.style.zoom = prevZoom;
+    }
+  }, []);
+
+  const saveImageAsJpg = async () => {
+    if (saving) return;
+    setSaving(true);
+    setImageMenuOpen(false);
+    try {
+      const canvas = await renderPassportCanvas();
+      const url = canvas.toDataURL('image/jpeg', 0.92);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `passport-${state.character.name || 'character'}.png`;
+      a.download = `passport-${state.character.name || 'character'}.jpg`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -207,12 +224,79 @@ function PassportMaker() {
       console.error('Failed to save image:', err);
       showToast(t(state.lang, 'imageSaveError'), 'error');
     } finally {
-      if (el) {
-        el.style.animation = prevAnimation;
-        el.style.zoom = prevZoom;
-      }
       setSaving(false);
     }
+  };
+
+  const copyImageToClipboard = async () => {
+    if (saving) return;
+    setSaving(true);
+    setImageMenuOpen(false);
+    try {
+      const canvas = await renderPassportCanvas();
+      const blob = await new Promise<Blob>((resolve, reject) =>
+        canvas.toBlob(b => (b ? resolve(b) : reject(new Error('toBlob failed'))), 'image/png')
+      );
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      showToast(t(state.lang, 'imageCopied'));
+    } catch (err) {
+      console.error('Failed to copy image:', err);
+      showToast(t(state.lang, 'imageCopyError'), 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const buildTextContent = (): string => {
+    const { character, stamps, passportNo, issueDate } = state;
+    const lang = state.lang;
+    const lines: string[] = [];
+    lines.push(`[${t(lang, 'characterInfo')}]`);
+    if (character.name) lines.push(`${t(lang, 'nameLabel')}: ${character.name}`);
+    if (character.birthdate) lines.push(`${t(lang, 'birthdate')}: ${character.birthdate}`);
+    if (character.nationality) lines.push(`${t(lang, 'nationality')}: ${character.nationality}`);
+    if (character.city) lines.push(`${t(lang, 'city')}: ${character.city}`);
+    if (character.likes) lines.push(`${t(lang, 'likesLabel')}: ${character.likes}`);
+    if (character.caution) lines.push(`${t(lang, 'cautionLabel')}: ${character.caution}`);
+    if (character.message) lines.push(`${t(lang, 'favorites')}: ${character.message}`);
+    lines.push('');
+    lines.push(`[${t(lang, 'characterPassport')}]`);
+    lines.push(`${t(lang, 'passportNo')}: ${passportNo}`);
+    lines.push(`${t(lang, 'issueDate')}: ${issueDate}`);
+    if (stamps.length > 0) {
+      lines.push('');
+      lines.push(`[${t(lang, 'visasPage')}]`);
+      stamps.forEach((s, i) => {
+        lines.push(`${i + 1}. ${s.emoji || '🖼️'} ${s.place} (${s.date})`);
+      });
+    }
+    return lines.join('\n');
+  };
+
+  const saveTextAsTxt = () => {
+    const text = buildTextContent();
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `passport-${state.character.name || 'character'}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast(t(state.lang, 'textSaved'));
+    setTextMenuOpen(false);
+  };
+
+  const copyTextToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(buildTextContent());
+      showToast(t(state.lang, 'textCopied'));
+    } catch (err) {
+      console.error('Failed to copy text:', err);
+      showToast(t(state.lang, 'textCopyError'), 'error');
+    }
+    setTextMenuOpen(false);
   };
 
   const handleResizerMouseDown = useCallback((e: React.MouseEvent) => {
@@ -410,18 +494,64 @@ function PassportMaker() {
               </button>
             </div>
 
-            <button
-              data-testid="btn-save-image"
-              className="btn btn-primary btn-sm"
-              onClick={saveImage}
-              disabled={saving}
-              style={{ marginLeft: 'auto' }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
-                {saving ? 'hourglass_empty' : 'download'}
-              </span>
-              {saving ? t(state.lang, 'savingImage') : t(state.lang, 'saveImage')}
-            </button>
+            <div style={{ display: 'flex', gap: 6, marginLeft: 'auto' }}>
+              {/* Text save dropdown */}
+              <div ref={textMenuRef} style={{ position: 'relative' }}>
+                <button
+                  data-testid="btn-save-text"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setTextMenuOpen(v => !v)}
+                  aria-expanded={textMenuOpen}
+                  aria-haspopup="menu"
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>text_snippet</span>
+                  {t(state.lang, 'saveText')}
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>arrow_drop_down</span>
+                </button>
+                {textMenuOpen && (
+                  <div className="json-dropdown" role="menu">
+                    <button className="json-dropdown-item" onClick={saveTextAsTxt} role="menuitem">
+                      <span className="material-symbols-outlined" style={{ fontSize: 17 }}>download</span>
+                      {t(state.lang, 'saveTxtFile')}
+                    </button>
+                    <button className="json-dropdown-item" onClick={copyTextToClipboard} role="menuitem">
+                      <span className="material-symbols-outlined" style={{ fontSize: 17 }}>content_copy</span>
+                      {t(state.lang, 'copyClipboard')}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Image save dropdown */}
+              <div ref={imageMenuRef} style={{ position: 'relative' }}>
+                <button
+                  data-testid="btn-save-image"
+                  className="btn btn-primary btn-sm"
+                  onClick={() => !saving && setImageMenuOpen(v => !v)}
+                  disabled={saving}
+                  aria-expanded={imageMenuOpen}
+                  aria-haspopup="menu"
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+                    {saving ? 'hourglass_empty' : 'image'}
+                  </span>
+                  {saving ? t(state.lang, 'savingImage') : t(state.lang, 'saveImage')}
+                  {!saving && <span className="material-symbols-outlined" style={{ fontSize: 16 }}>arrow_drop_down</span>}
+                </button>
+                {imageMenuOpen && (
+                  <div className="json-dropdown" role="menu">
+                    <button className="json-dropdown-item" onClick={saveImageAsJpg} role="menuitem">
+                      <span className="material-symbols-outlined" style={{ fontSize: 17 }}>download</span>
+                      {t(state.lang, 'saveJpgFile')}
+                    </button>
+                    <button className="json-dropdown-item" onClick={copyImageToClipboard} role="menuitem">
+                      <span className="material-symbols-outlined" style={{ fontSize: 17 }}>content_copy</span>
+                      {t(state.lang, 'copyClipboard')}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="canvas-workspace">
