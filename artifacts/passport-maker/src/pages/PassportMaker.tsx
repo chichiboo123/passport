@@ -187,17 +187,18 @@ function PassportMaker() {
     const prevZoom = el.style.zoom;
     el.style.animation = 'none';
     el.style.zoom = '1';
+    // Two frames: first applies the style change, second ensures layout/paint is stable
+    await new Promise(resolve => requestAnimationFrame(resolve));
     await new Promise(resolve => requestAnimationFrame(resolve));
     try {
+      // allowTaint must be false (default) so toDataURL() doesn't throw SecurityError.
+      // useCORS handles external images; data-URL images (photo/stamps) are same-origin
+      // and load fine without taint. windowWidth/windowHeight are omitted to avoid
+      // html2canvas internally triggering the mobile media-query (zoom:0.52).
       return await html2canvas(el, {
         useCORS: true,
-        allowTaint: true,
         backgroundColor: '#ffffff',
         scale: 2,
-        width: el.scrollWidth,
-        height: el.scrollHeight,
-        windowWidth: el.scrollWidth,
-        windowHeight: el.scrollHeight,
         logging: false,
       });
     } finally {
