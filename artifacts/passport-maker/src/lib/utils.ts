@@ -6,9 +6,13 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 const POSITIVE_WORDS = [
-  'JOY', 'HOPE', 'LOVE', 'STAR', 'DREAM', 'SMILE', 'HAPPY', 'BRAVE',
-  'KIND', 'SUNNY', 'LUCKY', 'PEACE', 'MAGIC', 'SPARK', 'BLOOM',
-  'LIGHT', 'GLOW', 'SHINE', 'SWEET', 'WISH',
+  'BLOOM', 'BRAVE', 'BRIGHT', 'CALM', 'CHALLENGE', 'CHEER', 'DREAM', 'ENERGY',
+  'FAVORITE', 'FLOWER', 'FRIEND', 'FUTURE', 'GIFT', 'GLAD', 'GLOW', 'GOOD',
+  'GRACE', 'GREAT', 'HAPPY', 'HEAL', 'HELP', 'HERO', 'HOPE', 'JOY',
+  'KIND', 'LIGHT', 'LOVE', 'MAGIC', 'PEACE', 'PROUD', 'RAINBOW', 'SAFE',
+  'SHINE', 'SMILE', 'SPARK', 'STAR', 'SUCCESS', 'SUN', 'SUPPORT', 'SWEET',
+  'TALENT', 'TOGETHER', 'TREASURE', 'TRUST', 'VICTORY', 'WELCOME', 'WISH', 'WONDER',
+  'WORLD', 'YOUNG',
 ];
 
 export function generatePassportNo(): string {
