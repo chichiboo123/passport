@@ -446,6 +446,7 @@ function PassportMaker() {
           onPhotoClick={() => fileInputRef.current?.click()}
           onStampFormChange={(partial) => setStampForm(prev => ({ ...prev, ...partial }))}
           onAddStamp={addStamp}
+          onRegeneratePassportNo={() => update({ passportNo: generatePassportNo() })}
           style={{ width: sidebarWidth }}
         />
         <div className="sidebar-resizer" onMouseDown={handleResizerMouseDown} />

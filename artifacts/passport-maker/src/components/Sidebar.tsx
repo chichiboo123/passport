@@ -11,6 +11,7 @@ interface SidebarProps {
   onPhotoClick: () => void;
   onStampFormChange: (partial: Partial<{ emoji: string; place: string; date: string; image: string }>) => void;
   onAddStamp: () => void;
+  onRegeneratePassportNo: () => void;
   style?: React.CSSProperties;
 }
 
@@ -37,6 +38,7 @@ export default function Sidebar({
   onPhotoClick,
   onStampFormChange,
   onAddStamp,
+  onRegeneratePassportNo,
   style,
 }: SidebarProps) {
   const lang: Lang = state.lang;
@@ -204,6 +206,32 @@ export default function Sidebar({
             onChange={e => onCharacterChange({ message: e.target.value })}
             rows={2}
           />
+        </div>
+
+        {/* Passport number row */}
+        <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8, background: 'hsl(var(--muted))', borderRadius: 8, padding: '7px 10px' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: 14, color: 'hsl(var(--muted-foreground))', flexShrink: 0 }}>badge</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', color: 'hsl(var(--muted-foreground))', textTransform: 'uppercase', marginBottom: 1 }}>
+              {t(lang, 'passportNo')}
+            </div>
+            <div style={{ fontFamily: 'monospace', fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', color: 'hsl(var(--foreground))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {state.passportNo}
+            </div>
+          </div>
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              data-testid="btn-regenerate-passport-no"
+              className="btn btn-sm btn-secondary"
+              style={{ padding: '5px 7px', minHeight: 0, flexShrink: 0 }}
+              onClick={onRegeneratePassportNo}
+              aria-label="여권 번호 랜덤 변경"
+              title="여권 번호 랜덤 변경"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 15 }}>shuffle</span>
+            </button>
+          </div>
         </div>
       </div>
 
