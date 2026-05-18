@@ -158,7 +158,7 @@ export default function PassportProfile({ state, mrz, lang }: Props) {
         </div>
 
         {/* Profile content — flex:1 fills remaining space between header and MRZ */}
-        <div style={{ flex: 1, padding: '12px 14px', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', overflow: 'auto', minHeight: 0 }}>
+        <div style={{ flex: 1, padding: '12px 14px', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
 
           {/* Photo + basic info row */}
           <div style={{ display: 'flex', gap: 12, marginBottom: 10 }}>
@@ -192,7 +192,7 @@ export default function PassportProfile({ state, mrz, lang }: Props) {
           </div>
 
           {/* Likes + Caution section */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5, flex: 1, minHeight: 0 }}>
             <SubField
               icon="favorite"
               label={t(lang, 'likesPassport')}
@@ -267,6 +267,10 @@ function SubField({ icon, label, value, accentColor }: { icon: string; label: st
       background: '#f5f5f0',
       borderRadius: 6,
       padding: '5px 9px',
+      flex: 1,
+      minHeight: 0,
+      display: 'flex',
+      flexDirection: 'column',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
         <span className="material-symbols-outlined" style={{ fontSize: 10, color: accentColor }}>
@@ -282,6 +286,9 @@ function SubField({ icon, label, value, accentColor }: { icon: string; label: st
         lineHeight: 1.4,
         whiteSpace: 'pre-line',
         wordBreak: 'break-word',
+        overflowY: 'auto',
+        flex: 1,
+        minHeight: 0,
       }}>
         {value || '—'}
       </div>
