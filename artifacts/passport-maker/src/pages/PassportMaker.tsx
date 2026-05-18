@@ -187,6 +187,22 @@ function PassportMaker() {
     const prevZoom = el.style.zoom;
     el.style.animation = 'none';
     el.style.zoom = '1';
+
+    // Temporarily remove all overflow constraints so scrolled content is fully captured
+    type SavedOverflow = { el: HTMLElement; overflow: string; overflowY: string };
+    const savedOverflows: SavedOverflow[] = [];
+    [el, ...Array.from(el.querySelectorAll<HTMLElement>('*'))].forEach(node => {
+      const computed = window.getComputedStyle(node);
+      if (
+        computed.overflow === 'hidden' || computed.overflow === 'auto' ||
+        computed.overflowY === 'hidden' || computed.overflowY === 'auto'
+      ) {
+        savedOverflows.push({ el: node, overflow: node.style.overflow, overflowY: node.style.overflowY });
+        node.style.overflow = 'visible';
+        node.style.overflowY = 'visible';
+      }
+    });
+
     // Two frames: first applies the style change, second ensures layout/paint is stable
     await new Promise(resolve => requestAnimationFrame(resolve));
     await new Promise(resolve => requestAnimationFrame(resolve));
@@ -204,6 +220,10 @@ function PassportMaker() {
     } finally {
       el.style.animation = prevAnimation;
       el.style.zoom = prevZoom;
+      savedOverflows.forEach(({ el: node, overflow, overflowY }) => {
+        node.style.overflow = overflow;
+        node.style.overflowY = overflowY;
+      });
     }
   }, []);
 
