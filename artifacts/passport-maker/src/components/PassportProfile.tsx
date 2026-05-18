@@ -254,7 +254,7 @@ function InfoRow({ label, value, large }: { label: string; value: string; large?
       <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.1em', color: '#999', textTransform: 'uppercase', marginBottom: 1 }}>
         {label}
       </div>
-      <div style={{ fontSize: large ? 15 : 11, fontWeight: large ? 700 : 500, color: '#222', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <div style={{ fontSize: large ? 15 : 11, fontWeight: large ? 700 : 500, color: '#222', lineHeight: 1.3, wordBreak: 'break-word' }}>
         {value}
       </div>
     </div>
@@ -268,7 +268,8 @@ function SubField({ icon, label, value, accentColor }: { icon: string; label: st
       borderRadius: 6,
       padding: '5px 9px',
       flex: 1,
-      overflow: 'hidden',
+      minHeight: 0,
+      overflow: 'auto',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
         <span className="material-symbols-outlined" style={{ fontSize: 10, color: accentColor }}>
